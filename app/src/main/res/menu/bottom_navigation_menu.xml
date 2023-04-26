@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/chatFragment"
+        android:enabled="true"
+        android:icon="@drawable/outline_chat_24"
+        android:title="Chat"/>
+    <item
+        android:id="@+id/SecondFragment"
+        android:enabled="true"
+        android:icon="@drawable/outline_insert_chart_outlined_24"
+        android:title="Analytics"/>
+</menu>
