@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+/app/src/androidTest/java/com/glyph/oskihealth/
+/app/src/test/java/com/glyph/oskihealth/
