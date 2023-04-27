@@ -8,20 +8,19 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.android.volley.Request.Method
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.Volley
+import com.google.gson.Gson
 
-/**
- * A fragment representing a list of Items.
- */
 class chatFragment : Fragment() {
-
     private var columnCount = 1
+    private lateinit var queue: RequestQueue
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_chat_list, container, false)
+        queue = Volley.newRequestQueue(context)
 
         // Set the adapter
         if (view is RecyclerView) {
@@ -30,10 +29,33 @@ class chatFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                val chats = listOf(Contact(Contact.ContactType.AI, "Wellness Bot"), Contact(Contact.ContactType.PERSON, "Alice"), Contact(Contact.ContactType.PERSON, "Bob"))
+                val chats = arrayListOf(Contact(Contact.ContactType.AI, "Wellness Bot"))
                 adapter = ChatsListRecyclerViewAdapter(chats, requireContext())
+                val request = AuthorisedRequest(Method.GET, "/my-chats",
+                    { response ->
+                        val gson = Gson()
+                        val stuff = gson.fromJson(response, ContactList::class.java)!!
+                        for (name in stuff.contactList) {
+                            chats.add(Contact(Contact.ContactType.PERSON, name))
+                        }
+                        adapter?.notifyItemRangeInserted(1, stuff.contactList.size)
+                    }, {}
+                )
+                queue.add(request)
             }
         }
         return view
     }
+
+    fun refreshContacts() {
+        val request = AuthorisedRequest(Method.GET, "/my-chats",
+            { response ->
+                val gson = Gson()
+                val stuff = gson.fromJson(response, ContactList::class.java)!!
+            }, {}
+        )
+        queue.add(request)
+    }
 }
+
+data class ContactList(val contactList: List<String>)
