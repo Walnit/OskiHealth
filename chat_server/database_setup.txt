@@ -1,0 +1,30 @@
+create table users (
+    username varchar(32) primary key,
+    password varchar(32),
+    psych INTEGER
+);
+create table messages (
+    sender varchar(32),
+    recipient varchar(32),
+    content varchar,
+    timestamp INTEGER
+);
+CREATE TABLE conversations (
+    person1 varchar(32),
+    person2 varchar(32)
+);
+CREATE TRIGGER convo_cache AFTER INSERT ON messages FOR EACH ROW
+WHEN NOT EXISTS (SELECT 1 FROM conversations
+    WHERE (person1 = NEW.sender AND person2 = NEW.recipient)
+    OR (person1 = NEW.recipient AND person2 = NEW.sender))
+BEGIN
+    INSERT INTO conversations VALUES (NEW.sender, NEW.recipient);
+END;
+
+
+insert into users VALUES('mingy', '12345678901234567890123456789012', 1);
+insert into messages VALUES('walnit', 'mingy', 'ur mom', 123);
+
+select timestamp, content, sender from messages WHERE (sender = 'value1' AND recipient = 'value2') OR (sender = 'value2' AND recipient = 'value1');
+
+SELECT DISTINCT CASE WHEN person1 = 'mingy' THEN person2 ELSE person1 END AS correspondent FROM conversations WHERE person1 = 'mingy' OR person2 = 'mingy';
