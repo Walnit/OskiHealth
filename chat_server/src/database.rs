@@ -23,17 +23,6 @@ macro_rules! query_all {
     }};
 }
 
-#[macro_export]
-macro_rules! message_from_row {
-    ($row:expr) => {{
-        NetworkMessage {
-            content: $row.get(1),
-            sender: $row.get(2),
-            timestamp: $row.get(4),
-        }
-    }};
-}
-
 pub fn two_string_hash(str1: &str, str2: &str) -> u64 {
     let mut hasher = DefaultHasher::new();
     if str1 < str2 {

@@ -160,13 +160,19 @@ async fn all_messages(form: Form<MessagesQuery>, user: User,
         mut db: Connection<ChatDB>) -> Option<Json<Vec<NetworkMessage>>> {
             
     let query = match query_all!(sqlx::query(
-            "SELECT timestamp, content, sender FROM messages WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)"
+            "SELECT sender, content, timestamp FROM messages WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)"
         ).bind(&form.username).bind(&user.username)
         .bind(&user.username).bind(&form.username), &mut *db) {
             Ok(val) => val,
             _ => return None
         };
-    Some(Json(query.iter().map(|row| message_from_row!(row)).collect()))
+    Some(Json(query.iter().map(|row|
+        NetworkMessage {
+            sender: row.try_get(0).unwrap(),
+            content: row.try_get(1).unwrap(),
+            timestamp: row.try_get(2).unwrap()
+        }
+    ).collect()))
 }
 
 #[derive(FromForm)] struct UserForm { username: String, password: String }
