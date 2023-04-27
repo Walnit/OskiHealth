@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="4dp"
     android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
     app:cardCornerRadius="4dp"
     app:cardElevation="4dp"
     app:contentPadding="8dp"
@@ -18,14 +19,19 @@
             android:id="@+id/message_sender"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Sender"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/message_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxWidth="300dp"
+            android:text="Message"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/message_sender" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -24,18 +24,28 @@ class MessagesFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_messages_list, container, false)
 
         // Set the adapter
-        if (view is RecyclerView) {
-            with(view) {
-                layoutManager = when {
-                    columnCount <= 1 -> LinearLayoutManager(context)
-                    else -> GridLayoutManager(context, columnCount)
-                }
-
-                // TODO: Actually get messages
-                val messages: List<Message> = listOf(Message(System.currentTimeMillis(), "hello, world!", "walnit"))
-
-                adapter = MessagesRecyclerViewAdapter(messages)
+        with(view) {
+            val recyclerView: RecyclerView = findViewById(R.id.list)
+            recyclerView.layoutManager = when {
+                columnCount <= 1 -> LinearLayoutManager(context)
+                else -> GridLayoutManager(context, columnCount)
             }
+
+            // TODO: Actually get messages
+            val messages: List<Message> = listOf(
+                Message(System.currentTimeMillis(), "hello, world!", "walnit"),
+                Message(System.currentTimeMillis(), "hello, world!", "walnit"),
+                Message(System.currentTimeMillis(), "hello, world!", "walnit"),
+                Message(System.currentTimeMillis(), "hello, world!", "walnit"),
+                Message(System.currentTimeMillis(), "hello, world!", "walnit"),
+                Message(System.currentTimeMillis(), "hello, world!", "walnit"),
+                Message(System.currentTimeMillis(), "hello, world!", "walnit"),
+                Message(System.currentTimeMillis(), "hello, world!", "walnit"),
+                Message(System.currentTimeMillis(), "hello, world!", "walnit"),
+                Message(System.currentTimeMillis(), "hello, world!", "walnit")
+            )
+
+            recyclerView.adapter = MessagesRecyclerViewAdapter(messages)
         }
         return view
     }
