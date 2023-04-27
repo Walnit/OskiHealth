@@ -12,6 +12,7 @@ import com.android.volley.Request.Method
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class chatFragment : Fragment() {
     private var columnCount = 1
@@ -34,11 +35,10 @@ class chatFragment : Fragment() {
                 val request = AuthorisedRequest(Method.GET, "/my-chats",
                     { response ->
                         val gson = Gson()
-                        val stuff = gson.fromJson(response, ContactList::class.java)!!
-                        for (name in stuff.contactList) {
-                            chats.add(Contact(name))
-                        }
-                        adapter?.notifyItemRangeInserted(1, stuff.contactList.size)
+                        val listType = object : TypeToken<ArrayList<String>>(){}.type
+                        val list = gson.fromJson<ArrayList<String>>(response, listType)
+                        for (name in list) chats.add(Contact(name, false, false))
+                        adapter?.notifyItemRangeInserted(1, list.size)
                     }, {}
                 )
                 queue.add(request)
