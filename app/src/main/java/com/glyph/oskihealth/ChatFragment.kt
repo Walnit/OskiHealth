@@ -29,14 +29,14 @@ class chatFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                val chats = arrayListOf(Contact(Contact.ContactType.AI, "Wellness Bot"))
-                adapter = ChatsListRecyclerViewAdapter(chats, requireContext())
+                val chats = arrayListOf(Contact("Wellness Bot", isBot = true))
+                adapter = ChatsListRecyclerViewAdapter(chats)
                 val request = AuthorisedRequest(Method.GET, "/my-chats",
                     { response ->
                         val gson = Gson()
                         val stuff = gson.fromJson(response, ContactList::class.java)!!
                         for (name in stuff.contactList) {
-                            chats.add(Contact(Contact.ContactType.PERSON, name))
+                            chats.add(Contact(name))
                         }
                         adapter?.notifyItemRangeInserted(1, stuff.contactList.size)
                     }, {}

@@ -33,6 +33,9 @@
         <action
             android:id="@+id/action_chatFragment_to_messagesFragment"
             app:destination="@id/messagesFragment" />
+        <action
+            android:id="@+id/action_chatFragment_to_botFragment"
+            app:destination="@id/botFragment" />
     </fragment>
     <fragment
         android:id="@+id/messagesFragment"
@@ -44,4 +47,8 @@
         android:name="com.glyph.oskihealth.AnalyticsFragment"
         android:label="Analytics"
         tools:layout="@layout/fragment_analytics" />
+    <fragment
+        android:id="@+id/botFragment"
+        android:name="com.glyph.oskihealth.BotFragment"
+        android:label="Wellness Bot" />
 </navigation>

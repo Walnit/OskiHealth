@@ -1,10 +1,9 @@
 package com.glyph.oskihealth
 
 data class Contact(
-    val type: ContactType,
-    val name: String
+    val name: String,
+    val isPsych: Boolean = false,
+    val isBot: Boolean = false
 ) {
-    enum class ContactType {
-        PERSON, AI
-    }
+
 }

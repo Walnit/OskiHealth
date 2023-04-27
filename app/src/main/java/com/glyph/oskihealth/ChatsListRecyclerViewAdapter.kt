@@ -17,8 +17,7 @@ import com.glyph.oskihealth.databinding.FragmentChatItemBinding
  * TODO: Replace the implementation with code for your data type.
  */
 class ChatsListRecyclerViewAdapter(
-    private val values: List<Contact>  ,
-    private val context: Context
+    private val values: List<Contact>
 ) : RecyclerView.Adapter<ChatsListRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -35,14 +34,19 @@ class ChatsListRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = values[position]
-        when (item.type) {
-            Contact.ContactType.PERSON -> holder.typeIcon.setImageResource(R.drawable.outline_person_24)
-            Contact.ContactType.AI -> holder.typeIcon.setImageResource(R.drawable.outline_smart_toy_24)
+        when (item.isPsych) {
+            true -> holder.typeIcon.setImageResource(R.drawable.outline_medical_information_24)
+            false -> holder.typeIcon.setImageResource(R.drawable.outline_person_24)
         }
+        if (item.isBot) holder.typeIcon.setImageResource(R.drawable.outline_smart_toy_24)
         holder.contentView.text = item.name
 
         holder.root.setOnClickListener {
-            Navigation.findNavController(holder.root).navigate(R.id.action_chatFragment_to_messagesFragment, bundleOf("name" to item.name))
+            if (!item.isBot) {
+                Navigation.findNavController(holder.root).navigate(R.id.action_chatFragment_to_messagesFragment, bundleOf("name" to item.name))
+            } else {
+                Navigation.findNavController(holder.root).navigate(R.id.action_chatFragment_to_botFragment)
+            }
         }
     }
 
