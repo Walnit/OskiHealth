@@ -6,7 +6,7 @@
         android:icon="@drawable/outline_chat_24"
         android:title="Chat"/>
     <item
-        android:id="@+id/SecondFragment"
+        android:id="@+id/analyticsFragment"
         android:enabled="true"
         android:icon="@drawable/outline_insert_chart_outlined_24"
         android:title="Analytics"/>

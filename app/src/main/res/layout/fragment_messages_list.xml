@@ -24,11 +24,12 @@
 
     <Button
         android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="?attr/materialIconButtonFilledStyle"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_marginEnd="16dp"
         android:layout_weight="1"
-        android:text="Send"
+        android:paddingLeft="18dp"
         app:icon="@drawable/outline_send_24"
         app:layout_constraintBottom_toBottomOf="@+id/textInputLayout"
         app:layout_constraintEnd_toEndOf="parent"
@@ -48,9 +49,10 @@
         app:layoutManager="LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/textInputLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
         tools:context=".MessagesFragment"
         tools:itemCount="5"
         tools:listitem="@layout/fragment_messages_item" />
