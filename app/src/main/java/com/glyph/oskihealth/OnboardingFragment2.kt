@@ -57,7 +57,7 @@ class OnboardingFragment2 : Fragment() {
                     if (response == "good") {
                         success(username, password)
                     } else {
-                        val signInRequest = AuthorisedRequest(Method.GET, "/login",
+                        val signInRequest = object : AuthorisedRequest(Method.GET, "/login",
                             { success(username, password) },
                             {
                                 MaterialAlertDialogBuilder(requireContext())
@@ -65,7 +65,16 @@ class OnboardingFragment2 : Fragment() {
                                     .setMessage("Sorry, we are not able to process your request at this time. Please check your username/password and try again later.")
                                     .show()
                             }
-                        )
+                        ) {
+                            override fun getHeaders(): MutableMap<String, String> {
+                                val old = super.getHeaders()
+                                val new = HashMap<String, String>()
+                                for ((key, value) in old) new[key] = value
+                                new["X-Username"] = username
+                                new["X-Password"] = password
+                                return new
+                            }
+                        }
                         queue.add(signInRequest)
                     }
                 }, {}
@@ -84,6 +93,8 @@ class OnboardingFragment2 : Fragment() {
     }
 
     fun success(username: String, password: String) {
+        AuthorisedRequest.USERNAME = username
+        AuthorisedRequest.PASSWORD = password
         val securePrefs = EncryptedSharedPreferences(
             requireContext(),
             "secure_prefs",

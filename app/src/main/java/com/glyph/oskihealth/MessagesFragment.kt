@@ -84,13 +84,15 @@ class MessagesFragment : Fragment() {
                 val text = content.text.toString()
                 messages.add(Message(now, text, AuthorisedRequest.USERNAME))
                 recyclerView.adapter?.notifyItemInserted(messages.size-1)
-                recyclerView.smoothScrollToPosition(messages.size-1)
+                recyclerView.scrollToPosition(messages.size-1)
                 content.text?.clear()
 
                 val sendRequest = object : AuthorisedRequest(Method.POST, "/send",
                 { response ->
                     val gson = Gson()
-                    val nlp = gson.fromJson(response.substring(0, response.length-1), NLPResult::class.java)
+                    val something = response.substring(1, response.length-2)
+                    for (i in 0..10) Log.d("mingy", something)
+                    val nlp = gson.fromJson(something, NLPResult::class.java)
                     Snackbar.make(this@with, nlp.label, Snackbar.LENGTH_SHORT).show()
                     // TODO: store this for analytics
                 }, {}) {
