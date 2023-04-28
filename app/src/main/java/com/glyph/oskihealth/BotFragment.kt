@@ -8,6 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ProgressBar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * A fragment representing a list of Items.
@@ -37,6 +44,24 @@ class BotFragment : Fragment() {
             )
 
             recyclerView.adapter = MessagesRecyclerViewAdapter(messages)
+
+            val button: Button = findViewById(R.id.button)
+            val progressBar: ProgressBar = findViewById(R.id.progressBar)
+
+            button.setOnClickListener {
+                button.visibility = View.GONE
+                progressBar.visibility = View.VISIBLE
+                CoroutineScope(Dispatchers.IO).launch {
+                    // TODO: Funny ChatGPT magic
+                    delay(2000)
+                    withContext(Dispatchers.Main) {
+                        // UPDATE UI HERE
+                        button.visibility = View.VISIBLE
+                        progressBar.visibility = View.GONE
+                    }
+                }
+            }
+
         }
         return view
     }

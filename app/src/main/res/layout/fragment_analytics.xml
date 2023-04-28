@@ -38,6 +38,35 @@
             app:icon="@drawable/outline_pie_chart_24" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/timeToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:checkedButton="@id/week_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toggleButton"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <Button
+            android:id="@+id/week_button"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Week" />
+
+        <Button
+            android:id="@+id/all_button"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="All Time" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/trend_layout"
         android:layout_width="match_parent"
@@ -46,7 +75,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toggleButton">
+        app:layout_constraintTop_toBottomOf="@+id/timeToggleButton">
 
         <com.patrykandpatrick.vico.views.chart.ChartView
             android:id="@+id/chart_view_trend"
@@ -77,6 +106,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <TextView
+            android:id="@+id/trend_feels"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="32dp"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="@+id/chart_view_trend"
+            app:layout_constraintStart_toStartOf="@+id/chart_view_trend"
+            app:layout_constraintTop_toBottomOf="@+id/chart_view_trend" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -88,7 +130,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toggleButton">
+        app:layout_constraintTop_toBottomOf="@+id/timeToggleButton">
 
         <com.patrykandpatrick.vico.views.chart.ChartView
             android:id="@+id/chart_view_value"

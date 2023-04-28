@@ -12,6 +12,7 @@ import com.android.volley.Request.Method
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.glyph.oskihealth.databinding.FragmentSecond2Binding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.HashMap
 
 /**
@@ -59,7 +60,10 @@ class OnboardingFragment2 : Fragment() {
                         val signInRequest = AuthorisedRequest(Method.GET, "/login",
                             { success(username, password) },
                             {
-                                // TODO: sign up / login failed
+                                MaterialAlertDialogBuilder(requireContext())
+                                    .setTitle("Error!")
+                                    .setMessage("Sorry, we are not able to process your request at this time. Please check your username/password and try again later.")
+                                    .show()
                             }
                         )
                         queue.add(signInRequest)
