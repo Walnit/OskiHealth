@@ -83,6 +83,7 @@ class MessagesFragment : Fragment() {
                 val text = content.text.toString()
                 messages.add(Message(now, text, AuthorisedRequest.USERNAME))
                 recyclerView.adapter?.notifyItemInserted(messages.size-1)
+                recyclerView.smoothScrollToPosition(messages.size-1)
                 content.text?.clear()
 
                 val sendRequest = object : AuthorisedRequest(Method.POST, "/send", {}, {}) {

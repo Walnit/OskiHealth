@@ -1,5 +1,6 @@
 package com.glyph.oskihealth
 
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.Menu
@@ -7,6 +8,7 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.fragment.NavHostFragment
@@ -14,6 +16,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.preference.PreferenceManager
 import com.glyph.oskihealth.databinding.ActivityMainBinding
 
 
@@ -21,8 +24,15 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    val launchOnboardingActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isFirstTime", false).apply()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        if (sharedPreferences.getBoolean("isFirstTime", true)) {
+            launchOnboardingActivity.launch(Intent(this, OnboardingActivity::class.java))
+        }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
 
@@ -61,21 +71,5 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
-    }
-
-    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        if (event.action == MotionEvent.ACTION_DOWN) {
-            val v = currentFocus
-            if (v is EditText) {
-                val outRect = Rect()
-                v.getGlobalVisibleRect(outRect)
-                if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
-                    v.clearFocus()
-                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0)
-                }
-            }
-        }
-        return super.dispatchTouchEvent(event)
     }
 }
