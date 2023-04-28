@@ -10,6 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.android.volley.Request.Method
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
@@ -17,6 +19,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.patrykandpatrick.vico.core.extension.floor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,6 +48,7 @@ class MessagesFragment : Fragment() {
             savedInstanceState: Bundle?): View? {
         person = requireArguments().getString("name")!!
         val view = inflater.inflate(R.layout.fragment_messages_list, container, false)
+        val sentiment_prefs = EncryptedSharedPreferences(requireContext(), "sentimentData", MasterKey(requireContext()))
         // Set the adapter
         with(view) {
             val recyclerView: RecyclerView = findViewById(R.id.list)
@@ -79,33 +83,66 @@ class MessagesFragment : Fragment() {
             val sendButton = findViewById<Button>(R.id.button)
             val content = findViewById<TextInputEditText>(R.id.sendMessageContent)
             sendButton.setOnClickListener {
-                // add to recyclerview
-                val now = Calendar.getInstance().timeInMillis
-                val text = content.text.toString()
-                messages.add(Message(now, text, AuthorisedRequest.USERNAME))
-                recyclerView.adapter?.notifyItemInserted(messages.size-1)
-                recyclerView.scrollToPosition(messages.size-1)
-                content.text?.clear()
+                if (!content.text.isNullOrEmpty()) {
+                    // add to recyclerview
+                    val now = Calendar.getInstance().timeInMillis
+                    val text = content.text.toString()
+                    messages.add(Message(now, text, AuthorisedRequest.USERNAME))
+                    recyclerView.adapter?.notifyItemInserted(messages.size - 1)
+                    recyclerView.scrollToPosition(messages.size - 1)
+                    content.text?.clear()
 
-                val sendRequest = object : AuthorisedRequest(Method.POST, "/send",
-                { response ->
-                    val gson = Gson()
-                    val something = response.substring(1, response.length-2)
-                    for (i in 0..10) Log.d("mingy", something)
-                    val nlp = gson.fromJson(something, NLPResult::class.java)
-                    Snackbar.make(this@with, nlp.label, Snackbar.LENGTH_SHORT).show()
-                    // TODO: store this for analytics
-                }, {}) {
-                    override fun getParams(): MutableMap<String, String> {
-                        val old = super.getParams()
-                        val new = HashMap<String, String>()
-                        if (old != null) for ((key, value) in old) new[key] = value
-                        new["recipient"] = person
-                        new["content"] = text
-                        return new
+                    val sendRequest = object : AuthorisedRequest(Method.POST, "/send",
+                        { response ->
+                            val gson = Gson()
+                            val something = response.substring(1, response.length - 2)
+//                            for (i in 0..10) Log.d("mingy", something)
+                            val nlp = gson.fromJson(something, NLPResult::class.java)
+                            if (text.split(" ").size > 1) {
+                                var resultValue: Float
+                                if (nlp.label == "positive") {
+                                    resultValue = 3f
+                                } else if (nlp.label == "negative") {
+                                    resultValue = -3f
+                                } else {
+                                    resultValue = 0f
+                                }
+                                val newValue =
+                                    (sentiment_prefs.getFloat(
+                                        (System.currentTimeMillis() / 86400000f).floor.toString(),
+                                        0f
+                                    ) + resultValue) /
+                                            (sentiment_prefs.getInt(
+                                                "${(System.currentTimeMillis() / 86400000f).floor.toString()}_count",
+                                                0
+                                            ) + 1)
+                                sentiment_prefs.edit()
+                                    .putFloat(
+                                        (System.currentTimeMillis() / 86400000f).floor.toString(),
+                                        newValue
+                                    )
+                                    .putInt(
+                                        "${(System.currentTimeMillis() / 86400000f).floor.toString()}_count",
+                                        sentiment_prefs.getInt(
+                                            "${(System.currentTimeMillis() / 86400000f).floor.toString()}_count",
+                                            0
+                                        ) + 1
+                                    )
+                                    .apply()
+                                Snackbar.make(this@with, nlp.label, Snackbar.LENGTH_SHORT).show()
+                            }
+                        }, {}) {
+                        override fun getParams(): MutableMap<String, String> {
+                            val old = super.getParams()
+                            val new = HashMap<String, String>()
+                            if (old != null) for ((key, value) in old) new[key] = value
+                            new["recipient"] = person
+                            new["content"] = text
+                            return new
+                        }
                     }
+                    queue.add(sendRequest)
                 }
-                queue.add(sendRequest)
             }
 
             content.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
@@ -137,13 +174,13 @@ class MessagesFragment : Fragment() {
                 try {
                     while (true) {
                         val line = withContext(Dispatchers.IO) { reader.readLine() }
-                        for (i in 0..5) Log.d("mingy", line)
+//                        for (i in 0..5) Log.d("mingy", line)
                         if (line == null) break
                         else if (line.isEmpty()) continue
                         val dataField = Regex("^data:(.*)$").find(line)?.groupValues?.get(1)
                         if (dataField != null) {
                             val message = Gson().fromJson(dataField, Message::class.java)
-                            for (i in 0..5) Log.d("mingy", message.content)
+//                            for (i in 0..5) Log.d("mingy", message.content)
                             if (message.sender == AuthorisedRequest.USERNAME) continue
                             withContext(Dispatchers.Main) {
                                 messages.add(message)
@@ -153,7 +190,7 @@ class MessagesFragment : Fragment() {
                         }
                     }
                 } catch (_: SocketException) {
-                    for (i in 0..100) Log.d("mingy", "eventstream closed")
+//                    for (i in 0..100) Log.d("mingy", "eventstream closed")
                 } // cry about it
             }
         }

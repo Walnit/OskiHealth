@@ -1,19 +1,21 @@
 package com.glyph.oskihealth
 
+import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.widget.doOnTextChanged
+import androidx.fragment.app.Fragment
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.android.volley.Request.Method
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.glyph.oskihealth.databinding.FragmentSecond2Binding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.util.HashMap
+
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
@@ -93,6 +95,8 @@ class OnboardingFragment2 : Fragment() {
     }
 
     fun success(username: String, password: String) {
+        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+        imm!!.hideSoftInputFromWindow(requireView().windowToken, 0)
         AuthorisedRequest.USERNAME = username
         AuthorisedRequest.PASSWORD = password
         val securePrefs = EncryptedSharedPreferences(
