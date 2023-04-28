@@ -22,9 +22,8 @@ BEGIN
 END;
 
 
-insert into users VALUES('mingy', '12345678901234567890123456789012', 1);
-insert into messages VALUES('walnit', 'mingy', 'ur mom', 123);
 
 select timestamp, content, sender from messages WHERE (sender = 'value1' AND recipient = 'value2') OR (sender = 'value2' AND recipient = 'value1');
 
-SELECT DISTINCT CASE WHEN person1 = 'mingy' THEN person2 ELSE person1 END AS correspondent FROM conversations WHERE person1 = 'mingy' OR person2 = 'mingy';
+
+SELECT DISTINCT CASE WHEN c.person1 = u.username THEN c.person1 ELSE c.person2 END AS correspondent, u.psych FROM conversations c INNER JOIN users u ON u.username IN (c.person1, c.person2) AND u.username <> 'mingy' WHERE 'mingy' IN (c.person1, c.person2);

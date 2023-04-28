@@ -56,7 +56,7 @@ impl<'r> FromRequest<'r> for User {
             None => return Outcome::Failure((Status::BadRequest, ()))
         };
 
-        let details: Result<(String, i32), _> = query_gen!(
+        let details: Result<(String, u8), _> = query_gen!(
             sqlx::query("SELECT password, psych FROM users WHERE username = ?")
             .bind(username), &mut *db).and_then(|row|
                 Ok((row.try_get(0)?, row.try_get(1)?)));
@@ -111,16 +111,24 @@ async fn subscribe(form: Form<SubscribeForm>, user: User,
 #[derive(FromForm)] struct MessageRequest { recipient: String, content: String, }
 #[post("/send", data = "<form>")]
 async fn send_message(form: Form<MessageRequest>, user: User,
-        mut db: Connection<ChatDB>, state: &State<MessageChannels>) -> &'static str {
+        mut db: Connection<ChatDB>, state: &State<MessageChannels>) -> Option<String> {
 
-    let timestamp: i64 = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis()
-        .try_into().unwrap();
+    if !user_exists!(&form.recipient, &mut *db) { return None }
+    if form.content.trim().len() == 0 { return None }
+    if form.recipient == user.username { return None }
+    let http_string = serde_urlencoded::to_string(
+        &[("message", &form.content)]
+    ).unwrap();
+    let rating = reqwest::get("http://localhost:5000/nlp?".to_owned() + &http_string)
+        .await.ok()?.text().await.ok();
+
+    let timestamp: i64 = SystemTime::now().duration_since(UNIX_EPOCH).unwrap()
+        .as_millis().try_into().unwrap();
     
-    // INSERT INTO messages VALUES(uuid, content, sender, signature, timestamp, hash)
+    // add to database
     let _ = query_gen!(sqlx::query(
         "INSERT INTO messages VALUES(?, ?, ?, ?)"
-    ).bind(&user.username).bind(&form.recipient).bind(&form.content)
-    .bind(&timestamp), &mut *db);
+    ).bind(&user.username).bind(&form.recipient).bind(&form.content).bind(&timestamp), &mut *db);
 
     // send it down the eventstream
     let convo_hash = two_string_hash(&form.recipient, &user.username);
@@ -141,7 +149,8 @@ async fn send_message(form: Form<MessageRequest>, user: User,
         recipient: form.recipient.clone(),
         timestamp
     });
-    "ok"
+    
+    rating
 }
 
 
@@ -188,20 +197,30 @@ async fn create_user(form: Form<UserForm>, mut db: Connection<ChatDB>) -> &'stat
     "fail"
 }
 
+const MAGIC_QUERY: &str = "SELECT DISTINCT CASE WHEN c.person1 = u.username THEN c.person1 ELSE c.person2 END AS correspondent, u.psych FROM conversations c INNER JOIN users u ON u.username IN (c.person1, c.person2) AND u.username <> ? WHERE ? IN (c.person1, c.person2)";
 #[get("/my-chats")]
-async fn conversations(user: User, mut db: Connection<ChatDB>) -> Option<Json<Vec<String>>> {
-    let query = match query_all!(sqlx::query(
-        "SELECT DISTINCT CASE WHEN person1 = ? THEN person2 ELSE person1 END AS correspondent FROM conversations WHERE person1 = ? OR person2 = ?"
-    ).bind(&user.username).bind(&user.username).bind(&user.username), &mut *db) {
+async fn conversations(user: User, mut db: Connection<ChatDB>) -> Option<Json<Vec<User>>> {
+    let query = match query_all!(sqlx::query(MAGIC_QUERY)
+        .bind(&user.username).bind(&user.username), &mut *db) {
             Ok(val) => val,
             _ => return None
         };
-    Some(Json(query.iter().map(|row| row.get(0)).collect()))
+    Some(Json(query.iter().map(|row|
+        User {
+            username: row.get(0),
+            psych: row.get::<u8, usize>(1) == 1
+        }
+    ).collect()))
 }
 
 #[get("/")]
 async fn index() -> Option<NamedFile> {
     NamedFile::open(Path::new("index.html")).await.ok()
+}
+
+#[get("/login")]
+fn login(_user: User) -> &'static str {
+    "ok"
 }
 
 #[launch]
@@ -210,5 +229,5 @@ fn rocket() -> _ {
         .attach(ChatDB::init())
         .manage(MessageChannels{map: Mutex::new(HashMap::new())})
         .mount("/", routes![index, conversations, all_messages,
-            send_message, subscribe, create_user])
+            send_message, subscribe, create_user, login])
 }

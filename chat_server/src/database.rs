@@ -23,6 +23,14 @@ macro_rules! query_all {
     }};
 }
 
+#[macro_export]
+macro_rules! user_exists {
+    ($username:expr, $conn:expr) => {{
+        sqlx::query("SELECT psych FROM users WHERE username = ?")
+            .bind($username).fetch_one($conn).await.is_ok()
+    }};
+}
+
 pub fn two_string_hash(str1: &str, str2: &str) -> u64 {
     let mut hasher = DefaultHasher::new();
     if str1 < str2 {
