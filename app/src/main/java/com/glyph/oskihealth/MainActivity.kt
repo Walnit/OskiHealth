@@ -1,13 +1,13 @@
 package com.glyph.oskihealth
 
+import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.Rect
 import android.os.Bundle
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.RatingBar
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -17,7 +17,11 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.glyph.oskihealth.databinding.ActivityMainBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.patrykandpatrick.vico.core.extension.floor
 
 
 class MainActivity : AppCompatActivity() {
@@ -44,9 +48,42 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
+        binding.bottomNavigation.setupWithNavController(navController)
         appBarConfiguration = AppBarConfiguration(setOf(R.id.chatFragment, R.id.analyticsFragment))
         setupActionBarWithNavController(navController, appBarConfiguration)
-        binding.bottomNavigation.setupWithNavController(navController)
+
+        val currentTime = System.currentTimeMillis()
+        // One day has passed since you last clicked
+        if ((currentTime / 86400000f).floor - (sharedPreferences.getLong("lastTime", 0)/86400000f).floor >= 1) {
+            val linearLayout = LinearLayout(this)
+            val ratingBar = RatingBar(this)
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+
+            linearLayout.gravity = Gravity.CENTER
+            ratingBar.layoutParams = lp
+            ratingBar.numStars = 4
+            ratingBar.stepSize = 1f
+
+            linearLayout.addView(ratingBar)
+
+            MaterialAlertDialogBuilder(this)
+                .setTitle("How are you feeling today?")
+                .setView(linearLayout)
+                .setPositiveButton("Done") { dialogInterface: DialogInterface, i: Int ->
+                    val checkInData = EncryptedSharedPreferences(
+                        this, "checkIn", MasterKey(this)
+                    )
+                    checkInData.edit().putFloat((currentTime / 86400000f).floor.toString(), ratingBar.rating).apply()
+                    sharedPreferences.edit().putLong("lastTime", System.currentTimeMillis()).apply()
+                    dialogInterface.dismiss()
+                }
+                .setCancelable(false)
+                .show()
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

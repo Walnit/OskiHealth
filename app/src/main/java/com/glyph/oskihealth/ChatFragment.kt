@@ -14,7 +14,7 @@ import com.android.volley.toolbox.Volley
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class chatFragment : Fragment() {
+class ChatFragment : Fragment() {
     private var columnCount = 1
     private lateinit var queue: RequestQueue
 
@@ -32,16 +32,16 @@ class chatFragment : Fragment() {
                 }
                 val chats = arrayListOf(Contact("Wellness Bot", isBot = true))
                 adapter = ChatsListRecyclerViewAdapter(chats)
-                val request = AuthorisedRequest(Method.GET, "/my-chats",
-                    { response ->
-                        val gson = Gson()
-                        val listType = object : TypeToken<ArrayList<String>>(){}.type
-                        val list = gson.fromJson<ArrayList<String>>(response, listType)
-                        for (name in list) chats.add(Contact(name, false, false))
-                        adapter?.notifyItemRangeInserted(1, list.size)
-                    }, {}
-                )
-                queue.add(request)
+//                val request = AuthorisedRequest(Method.GET, "/my-chats",
+//                    { response ->
+//                        val gson = Gson()
+//                        val listType = object : TypeToken<ArrayList<String>>(){}.type
+//                        val list = gson.fromJson<ArrayList<String>>(response, listType)
+//                        for (name in list) chats.add(Contact(name, false, false))
+//                        adapter?.notifyItemRangeInserted(1, list.size)
+//                    }, {}
+//                )
+//                queue.add(request)
             }
         }
         return view
