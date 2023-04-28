@@ -13,6 +13,7 @@ import android.widget.Button
 import com.android.volley.Request.Method
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -86,7 +87,13 @@ class MessagesFragment : Fragment() {
                 recyclerView.smoothScrollToPosition(messages.size-1)
                 content.text?.clear()
 
-                val sendRequest = object : AuthorisedRequest(Method.POST, "/send", {}, {}) {
+                val sendRequest = object : AuthorisedRequest(Method.POST, "/send",
+                { response ->
+                    val gson = Gson()
+                    val nlp = gson.fromJson(response.substring(0, response.length-1), NLPResult::class.java)
+                    Snackbar.make(this@with, nlp.label, Snackbar.LENGTH_SHORT).show()
+                    // TODO: store this for analytics
+                }, {}) {
                     override fun getParams(): MutableMap<String, String> {
                         val old = super.getParams()
                         val new = HashMap<String, String>()
@@ -151,3 +158,5 @@ class MessagesFragment : Fragment() {
         return view
     }
 }
+
+data class NLPResult(val label: String, val score: Float)

@@ -32,30 +32,20 @@ class ChatFragment : Fragment() {
                 }
                 val chats = arrayListOf(Contact("Wellness Bot", isBot = true))
                 adapter = ChatsListRecyclerViewAdapter(chats)
-//                val request = AuthorisedRequest(Method.GET, "/my-chats",
-//                    { response ->
-//                        val gson = Gson()
-//                        val listType = object : TypeToken<ArrayList<String>>(){}.type
-//                        val list = gson.fromJson<ArrayList<String>>(response, listType)
-//                        for (name in list) chats.add(Contact(name, false, false))
-//                        adapter?.notifyItemRangeInserted(1, list.size)
-//                    }, {}
-//                )
-//                queue.add(request)
+                  val request = AuthorisedRequest(Method.GET, "/my-chats",
+                      { response ->
+                          val gson = Gson()
+                          val listType = object : TypeToken<ArrayList<ContactItem>>(){}.type
+                          val list = gson.fromJson<ArrayList<ContactItem>>(response, listType)
+                          for (name in list) chats.add(Contact(name.username, name.psych))
+                          adapter?.notifyItemRangeInserted(1, list.size)
+                      }, {}
+                  )
+                  queue.add(request)
             }
         }
         return view
     }
-
-    fun refreshContacts() {
-        val request = AuthorisedRequest(Method.GET, "/my-chats",
-            { response ->
-                val gson = Gson()
-                val stuff = gson.fromJson(response, ContactList::class.java)!!
-            }, {}
-        )
-        queue.add(request)
-    }
 }
 
-data class ContactList(val contactList: List<String>)
+data class ContactItem(val username: String, val psych: Boolean)
