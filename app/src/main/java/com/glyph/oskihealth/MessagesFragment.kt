@@ -99,7 +99,7 @@ class MessagesFragment : Fragment() {
                 queue.add(sendRequest)
             }
 
-            content.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            content.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
                 recyclerView.scrollToPosition(messages.size-1)
             }
 
