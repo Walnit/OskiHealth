@@ -280,5 +280,4 @@ class AnalyticsFragment : Fragment() {
             valueLayout.visibility = View.VISIBLE
         }
     }
-
 }

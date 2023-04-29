@@ -3,12 +3,12 @@ package com.glyph.oskihealth
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
 import android.widget.RatingBar
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.fragment.NavHostFragment
@@ -28,14 +28,17 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    val launchOnboardingActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isFirstTime", false).apply()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val securePrefs = EncryptedSharedPreferences(this, "secure_prefs", MasterKey(this))
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        if (sharedPreferences.getBoolean("isFirstTime", true)) {
-            launchOnboardingActivity.launch(Intent(this, OnboardingActivity::class.java))
+        val username = securePrefs.getString("name", null)
+        val password = securePrefs.getString("password", null)
+        if (username == null || password == null) {
+            startActivity(Intent(this, OnboardingActivity::class.java))
+        } else {
+            AuthorisedRequest.USERNAME = username
+            AuthorisedRequest.PASSWORD = password
         }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
