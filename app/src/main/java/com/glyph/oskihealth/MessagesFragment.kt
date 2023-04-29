@@ -1,7 +1,6 @@
 package com.glyph.oskihealth
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.android.volley.Request.Method
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 import com.google.android.material.snackbar.Snackbar
@@ -96,7 +94,6 @@ class MessagesFragment : Fragment() {
                         { response ->
                             val gson = Gson()
                             val something = response.substring(1, response.length - 2)
-//                            for (i in 0..10) Log.d("mingy", something)
                             val nlp = gson.fromJson(something, NLPResult::class.java)
                             if (text.split(" ").size > 1) {
                                 var resultValue: Float
@@ -174,13 +171,11 @@ class MessagesFragment : Fragment() {
                 try {
                     while (true) {
                         val line = withContext(Dispatchers.IO) { reader.readLine() }
-//                        for (i in 0..5) Log.d("mingy", line)
                         if (line == null) break
                         else if (line.isEmpty()) continue
                         val dataField = Regex("^data:(.*)$").find(line)?.groupValues?.get(1)
                         if (dataField != null) {
                             val message = Gson().fromJson(dataField, Message::class.java)
-//                            for (i in 0..5) Log.d("mingy", message.content)
                             if (message.sender == AuthorisedRequest.USERNAME) continue
                             withContext(Dispatchers.Main) {
                                 messages.add(message)
@@ -189,9 +184,7 @@ class MessagesFragment : Fragment() {
                             }
                         }
                     }
-                } catch (_: SocketException) {
-//                    for (i in 0..100) Log.d("mingy", "eventstream closed")
-                } // cry about it
+                } catch (_: SocketException) {} // cry about it
             }
         }
         return view
