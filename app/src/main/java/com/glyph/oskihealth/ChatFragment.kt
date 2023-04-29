@@ -79,6 +79,11 @@ class ChatFragment : Fragment() {
          )
          queue.add(request)
      }
+
+    override fun onResume() {
+        refresh()
+        super.onResume()
+    }
 }
 
 data class ContactItem(val username: String, val psych: Boolean)

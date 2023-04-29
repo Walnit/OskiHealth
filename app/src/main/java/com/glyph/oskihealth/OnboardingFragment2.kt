@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -32,7 +31,7 @@ class OnboardingFragment2 : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentSecond2Binding.inflate(inflater, container, false)
         return binding.root
@@ -63,8 +62,8 @@ class OnboardingFragment2 : Fragment() {
                             { success(username, password) },
                             {
                                 MaterialAlertDialogBuilder(requireContext())
-                                    .setTitle("Error!")
-                                    .setMessage("Sorry, we are not able to process your request at this time. Please check your username/password and try again later.")
+                                    .setTitle("Wrong password!")
+                                    .setMessage("This usually means that the username is taken and you have entered the wrong password.")
                                     .show()
                             }
                         ) {

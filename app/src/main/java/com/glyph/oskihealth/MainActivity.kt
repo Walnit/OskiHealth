@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             MaterialAlertDialogBuilder(this)
                 .setTitle("How are you feeling today?")
                 .setView(linearLayout)
-                .setPositiveButton("Done") { dialogInterface: DialogInterface, i: Int ->
+                .setPositiveButton("Done") { dialogInterface: DialogInterface, _: Int ->
                     val checkInData = EncryptedSharedPreferences(
                         this, "checkIn", MasterKey(this)
                     )
@@ -98,7 +98,15 @@ class MainActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_logout -> {
+                val securePrefs = EncryptedSharedPreferences(this, "secure_prefs", MasterKey(this))
+                val edit = securePrefs.edit()
+                edit.remove("name")
+                edit.remove("password")
+                edit.apply()
+                startActivityForResult(Intent(this, OnboardingActivity::class.java), 69)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
