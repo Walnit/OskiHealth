@@ -6,6 +6,7 @@ use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use database::two_string_hash;
+use reqwest::Client;
 use rocket::{State, Shutdown};
 use rocket::form::Form;
 use rocket::fs::NamedFile;
@@ -223,11 +224,22 @@ fn login(_user: User) -> &'static str {
     "ok"
 }
 
+#[derive(Serialize, Deserialize)] struct ChatData { role: String, content: String }
+#[post("/chatgpt", data = "<json>")]
+async fn chatgpt(json: Json<Vec<ChatData>>) -> Option<String> {
+    let client = Client::new();
+    let response = client.post("http://localhost:5000/chatgpt")
+        .header("Content-Type", "application/json")
+        .body(serde_json::to_string(&json.0).unwrap())
+        .send().await.ok()?;
+    response.text().await.ok()
+}
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
         .attach(ChatDB::init())
         .manage(MessageChannels{map: Mutex::new(HashMap::new())})
         .mount("/", routes![index, conversations, all_messages,
-            send_message, subscribe, create_user, login])
+            send_message, subscribe, create_user, login, chatgpt])
 }
