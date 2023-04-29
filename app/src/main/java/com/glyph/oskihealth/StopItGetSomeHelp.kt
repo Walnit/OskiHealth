@@ -9,7 +9,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
+import com.android.volley.Request.Method
+import com.android.volley.toolbox.Volley
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 
@@ -43,7 +46,15 @@ class StopItGetSomeHelp : Fragment() {
                     .setMessage("this is a demo we're not gonna actually do money magic so press the button below to contact a professional")
                     .setPositiveButton("Contact Professional") { dialogInterface: DialogInterface, _ ->
                         dialogInterface.dismiss()
-                        // TODO: Contact psychologist (maybe on your side can you send this person a message from a fake account)
+                        val queue = Volley.newRequestQueue(requireContext())
+                        val request = AuthorisedRequest(Method.POST, "/get-help",
+                            { response ->
+                                //findNavController().navigate(R.id.action_chatFragment_to_messagesFragment, bundleOf("name" to response))
+                                // TODO: navigate to the messages fragment
+                                // `response` is the name of the psychiatrist
+                            }, {}
+                        )
+                        queue.add(request)
                         Snackbar.make(view, "Success! A psychologist will contact you shortly.", Snackbar.LENGTH_SHORT).show()
                     }
                     .show()

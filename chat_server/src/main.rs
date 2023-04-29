@@ -27,11 +27,7 @@ use rocket::tokio::select;
 #[database("sqlite")]
 pub struct ChatDB(SqlitePool);
 
-#[derive(Deserialize, Serialize)]
-struct User {
-    username: String,
-    psych: bool
-}
+#[derive(Deserialize, Serialize)] struct User { username: String, psych: bool }
 
 #[derive(Serialize, Clone)]
 struct Message {
@@ -73,7 +69,6 @@ impl<'r> FromRequest<'r> for User {
     }
 }
 
-// the fucking eventstream thing
 struct MessageChannels { map: Mutex<HashMap<u64, Sender<Message>>> }
 #[derive(FromForm)] struct SubscribeForm { username: String }
 #[post("/subscribe", data = "<form>")]
@@ -107,9 +102,7 @@ async fn subscribe(form: Form<SubscribeForm>, user: User,
     })
 }
 
-
-// MESSAGING
-#[derive(FromForm)] struct MessageRequest { recipient: String, content: String, }
+#[derive(FromForm)] struct MessageRequest { recipient: String, content: String }
 #[post("/send", data = "<form>")]
 async fn send_message(form: Form<MessageRequest>, user: User,
         mut db: Connection<ChatDB>, state: &State<MessageChannels>) -> Option<String> {
@@ -155,9 +148,6 @@ async fn send_message(form: Form<MessageRequest>, user: User,
 }
 
 
-/* im using a form bcos i cant find a way to get parameters from a GET request
-which also has to be validated by the User FromRequest thing
-works without parameters tho */
 #[derive(FromForm)] struct MessagesQuery { username: String }
 #[derive(Serialize, Clone)]
 struct NetworkMessage {
@@ -192,10 +182,22 @@ async fn create_user(form: Form<UserForm>, mut db: Connection<ChatDB>) -> &'stat
     form.password.hash(&mut hasher);
     let query = sqlx::query("INSERT INTO users VALUES (?, ?, ?)"
         ).bind(&form.username).bind(hasher.finish().to_string()).bind(0);
-    if query.execute(&mut *db).await.is_ok() {
-        return "good"
-    }
+    if query.execute(&mut *db).await.is_ok() { return "good" }
     "fail"
+}
+
+#[post("/get-help")]
+async fn get_help(user: User, mut db: Connection<ChatDB>) -> Option<String> {
+    let psych: String = query_one!(sqlx::query(
+        "SELECT username FROM users WHERE psych == 1 ORDER BY RANDOM() LIMIT 1"
+    ), &mut *db)?;
+    
+    let timestamp: i64 = SystemTime::now().duration_since(UNIX_EPOCH).unwrap()
+        .as_millis().try_into().unwrap();
+    let _ = query_gen!(sqlx::query(
+        "INSERT INTO messages VALUES(?, ?, 'I''m a verified psychiatrist here to help improve your mental health and well-being. Let''s work together to develop strategies to cope with difficult emotions, manage stress, and achieve your goals.', ?)"
+    ).bind(&psych).bind(&user.username).bind(&timestamp), &mut *db);
+    Some(psych)
 }
 
 const MAGIC_QUERY: &str = "SELECT DISTINCT CASE WHEN c.person1 = u.username THEN c.person1 ELSE c.person2 END AS correspondent, u.psych FROM conversations c INNER JOIN users u ON u.username IN (c.person1, c.person2) AND u.username <> ? WHERE ? IN (c.person1, c.person2)";
@@ -214,16 +216,6 @@ async fn conversations(user: User, mut db: Connection<ChatDB>) -> Option<Json<Ve
     ).collect()))
 }
 
-#[get("/")]
-async fn index() -> Option<NamedFile> {
-    NamedFile::open(Path::new("index.html")).await.ok()
-}
-
-#[get("/login")]
-fn login(_user: User) -> &'static str {
-    "ok"
-}
-
 #[derive(Serialize, Deserialize)] struct ChatData { role: String, content: String }
 #[post("/chatgpt", data = "<json>")]
 async fn chatgpt(json: Json<Vec<ChatData>>) -> Option<String> {
@@ -235,11 +227,14 @@ async fn chatgpt(json: Json<Vec<ChatData>>) -> Option<String> {
     response.text().await.ok()
 }
 
+#[get("/login")] fn login(_user: User) -> &'static str { "ok" }
+#[get("/")] async fn index() -> Option<NamedFile> { NamedFile::open(Path::new("index.html")).await.ok() }
+
 #[launch]
 fn rocket() -> _ {
     rocket::build()
         .attach(ChatDB::init())
         .manage(MessageChannels{map: Mutex::new(HashMap::new())})
-        .mount("/", routes![index, conversations, all_messages,
+        .mount("/", routes![index, conversations, all_messages, get_help,
             send_message, subscribe, create_user, login, chatgpt])
 }

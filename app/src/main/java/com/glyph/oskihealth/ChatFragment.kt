@@ -54,7 +54,7 @@ class ChatFragment : Fragment() {
 
             val addContactButton: Button = findViewById(R.id.addContactButton)
             addContactButton.setOnClickListener {
-                val usernameEditText: EditText = EditText(requireContext())
+                val usernameEditText = EditText(requireContext())
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Add Contact")
                     .setMessage("Enter the username of the person you want to contact: ")
