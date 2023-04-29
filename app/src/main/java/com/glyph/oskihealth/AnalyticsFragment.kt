@@ -5,8 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.navigation.findNavController
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.android.material.button.MaterialButton
@@ -33,22 +35,8 @@ class AnalyticsFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_analytics, container, false)
         with (view) {
             showWeekTrend(this)
-//            val checkInData = EncryptedSharedPreferences(
-//                requireContext(), "checkIn", MasterKey(requireContext())
-//            ).all.values.map { it as Float }
-//            checkInData.average()
-//
-//            val trendChartEntryModel = entryModelOf(*(checkInData.toTypedArray()))
-//            val trendChart: ChartView = findViewById(R.id.chart_view_trend)
-//            trendChart.setModel(trendChartEntryModel)
-//            val trendLayout: ConstraintLayout = findViewById(R.id.trend_layout)
-//
-//
-//            val valueChartEntryModel = entryModelOf(4f, 12f, 8f, 16f)
-//            val valueChart: ChartView = findViewById(R.id.chart_view_value)
-//            valueChart.setModel(valueChartEntryModel)
-//            val valueLayout: ConstraintLayout = findViewById(R.id.value_layout)
-//
+
+            val helpButton: Button = findViewById(R.id.help_button)
             val toggleButton: MaterialButtonToggleGroup = findViewById(R.id.toggleButton)
             val timeToggleButton: MaterialButtonToggleGroup = findViewById(R.id.timeToggleButton)
             toggleButton.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -87,6 +75,10 @@ class AnalyticsFragment : Fragment() {
                     }
                 }
             }
+
+            helpButton.setOnClickListener {
+                findNavController().navigate(R.id.action_analyticsFragment_to_stopItGetSomeHelp)
+            }
         }
 
         return view
@@ -121,33 +113,43 @@ class AnalyticsFragment : Fragment() {
                     feelsText = "You've had a lot of fluctuation, but overall your week was "
                     if (average > 3) {
                         feelsText += "very good!"
+                        findViewById<Button>(R.id.help_button).visibility = View.GONE
                     } else if (average > 2) {
                         feelsText += "quite good!"
+                        findViewById<Button>(R.id.help_button).visibility = View.GONE
                     } else {
                         feelsText += "pretty bad."
+                        findViewById<Button>(R.id.help_button).visibility = View.VISIBLE
                     }
                 } else if (maxdiff > 2) {
                     feelsText = "You've had your ups and downs, but overall your week was "
                     if (average > 3) {
                         feelsText += "very good!"
+                        findViewById<Button>(R.id.help_button).visibility = View.GONE
                     } else if (average > 2) {
                         feelsText += "quite good!"
+                        findViewById<Button>(R.id.help_button).visibility = View.GONE
                     } else {
                         feelsText += "pretty bad."
+                        findViewById<Button>(R.id.help_button).visibility = View.VISIBLE
                     }
                 } else {
                     if (average > 3) {
                         feelsText = "Your week has been very good!"
+                        findViewById<Button>(R.id.help_button).visibility = View.GONE
                     } else if (average > 2) {
                         feelsText = "Your week has been quite good!"
+                        findViewById<Button>(R.id.help_button).visibility = View.GONE
                     } else {
                         feelsText = "Your week has been pretty bad."
+                        findViewById<Button>(R.id.help_button).visibility = View.VISIBLE
                     }
                 }
 
                 feels.text = feelsText
             } else {
                 findViewById<TextView>(R.id.trend_feels).text = "Not enough data. Please use the app more often!"
+                findViewById<Button>(R.id.help_button).visibility = View.VISIBLE
             }
 
 
@@ -195,22 +197,29 @@ class AnalyticsFragment : Fragment() {
                     feelsText = "You've had a rough time overall, "
                     if (parts.last() - parts[parts.size - 1] >= 0.5) {
                         feelsText += "but it's getting better!"
+                        findViewById<Button>(R.id.help_button).visibility = View.VISIBLE
                     } else if ((parts.last() - parts[parts.size - 1]).absoluteValue < 0.5) {
                         feelsText += "and its not changing much."
+                        findViewById<Button>(R.id.help_button).visibility = View.VISIBLE
                     } else {
                         feelsText += "and its not getting better."
+                        findViewById<Button>(R.id.help_button).visibility = View.VISIBLE
                     }
                 } else {
                     if (parts.last() - parts[parts.size - 1] >= 0.5) {
                         feelsText = "Your mental health is getting better!"
+                        findViewById<Button>(R.id.help_button).visibility = View.GONE
                     } else if ((parts.last() - parts[parts.size - 1]).absoluteValue < 0.5) {
                         if (average >= 3) {
                             feelsText = "Your mental health is still staying strong!"
+                            findViewById<Button>(R.id.help_button).visibility = View.GONE
                         } else {
                             feelsText = "Your mental health is still quite bad."
+                            findViewById<Button>(R.id.help_button).visibility = View.VISIBLE
                         }
                     } else {
                         feelsText = "Yours mental health has been worsening."
+                        findViewById<Button>(R.id.help_button).visibility = View.VISIBLE
                     }
                 }
 
@@ -218,6 +227,7 @@ class AnalyticsFragment : Fragment() {
 
             } else {
                 findViewById<TextView>(R.id.trend_feels).text = "Not enough data. Please use the app for at least 5 days!"
+                findViewById<Button>(R.id.help_button).visibility = View.VISIBLE
             }
 
             val trendChart: ChartView = findViewById(R.id.chart_view_trend)

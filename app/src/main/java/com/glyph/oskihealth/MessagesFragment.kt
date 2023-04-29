@@ -13,7 +13,6 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -126,7 +125,6 @@ class MessagesFragment : Fragment() {
                                         ) + 1
                                     )
                                     .apply()
-                                Snackbar.make(this@with, nlp.label, Snackbar.LENGTH_SHORT).show()
                             }
                         }, {}) {
                         override fun getParams(): MutableMap<String, String> {
