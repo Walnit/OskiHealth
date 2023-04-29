@@ -126,6 +126,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="Contact professional"
+        android:enabled="false"
         app:icon="@drawable/outline_attach_money_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
