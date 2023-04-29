@@ -49,8 +49,7 @@ class StopItGetSomeHelp : Fragment() {
                         val queue = Volley.newRequestQueue(requireContext())
                         val request = AuthorisedRequest(Method.POST, "/get-help",
                             { response ->
-                                //findNavController().navigate(R.id.action_chatFragment_to_messagesFragment, bundleOf("name" to response))
-                                // TODO: navigate to the messages fragment
+                                findNavController().navigate(R.id.action_stopItGetSomeHelp_to_messagesFragment, bundleOf("name" to response))
                                 // `response` is the name of the psychiatrist
                             }, {}
                         )

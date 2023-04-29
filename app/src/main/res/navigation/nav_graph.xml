@@ -42,9 +42,13 @@
         tools:layout="@layout/fragment_stop_it_get_some_help">
         <action
             android:id="@+id/action_stopItGetSomeHelp_to_botFragment"
-            app:destination="@id/botFragment" />
+            app:destination="@id/botFragment"
+            app:popUpTo="@id/chatFragment" />
         <action
             android:id="@+id/action_stopItGetSomeHelp_to_chatFragment"
             app:destination="@id/chatFragment" />
+        <action
+            android:id="@+id/action_stopItGetSomeHelp_to_messagesFragment"
+            app:destination="@id/messagesFragment" />
     </fragment>
 </navigation>
