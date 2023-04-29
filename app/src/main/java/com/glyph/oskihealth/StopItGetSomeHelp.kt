@@ -1,5 +1,8 @@
 package com.glyph.oskihealth
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -40,23 +43,21 @@ class StopItGetSomeHelp : Fragment() {
             findViewById<Button>(R.id.open_article).setOnClickListener {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.healthhub.sg/live-healthy/1926/10-Essentials-for-Mental-Well-Being")))
             }
+            findViewById<Button>(R.id.copy_xmr).setOnClickListener {
+                val clipboardManager: ClipboardManager = view.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clipData = ClipData.newPlainText("XMR", "49eVpZLA61UBWo4zRmn32HNWk9fEDSUEuBShEHuTyTEQUSwoSKb94XJ8wsKromdoNyHBqFVgLjUvWjoofXMmadheHjhifK9")
+                clipboardManager.setPrimaryClip(clipData)
+                Snackbar.make(view, "Copied to clipboard!", Snackbar.LENGTH_SHORT).show()
+            }
             findViewById<Button>(R.id.subscribe).setOnClickListener {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("too poor to pay")
-                    .setMessage("this is a demo we're not gonna actually do money magic so press the button below to contact a professional")
-                    .setPositiveButton("Contact Professional") { dialogInterface: DialogInterface, _ ->
-                        dialogInterface.dismiss()
-                        val queue = Volley.newRequestQueue(requireContext())
-                        val request = AuthorisedRequest(Method.POST, "/get-help",
-                            { response ->
-                                findNavController().navigate(R.id.action_stopItGetSomeHelp_to_messagesFragment, bundleOf("name" to response))
-                                // `response` is the name of the psychiatrist
-                            }, {}
-                        )
-                        queue.add(request)
-                        Snackbar.make(view, "Success! A psychologist will contact you shortly.", Snackbar.LENGTH_SHORT).show()
-                    }
-                    .show()
+                val queue = Volley.newRequestQueue(requireContext())
+                val request = AuthorisedRequest(Method.POST, "/get-help",
+                    { response ->
+                        findNavController().navigate(R.id.action_stopItGetSomeHelp_to_messagesFragment, bundleOf("name" to response))
+                    }, {}
+                )
+                queue.add(request)
+                Snackbar.make(view, "Success! A psychologist will contact you shortly.", Snackbar.LENGTH_SHORT).show()
             }
         }
         return view
