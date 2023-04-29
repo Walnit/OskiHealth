@@ -22,7 +22,6 @@ import com.glyph.oskihealth.databinding.ActivityMainBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.patrykandpatrick.vico.core.extension.floor
 
-
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -34,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         val username = securePrefs.getString("name", null)
         val password = securePrefs.getString("password", null)
         if (username == null || password == null) {
-            startActivity(Intent(this, OnboardingActivity::class.java))
+            startActivityForResult(Intent(this, OnboardingActivity::class.java), 69)
         } else {
             AuthorisedRequest.USERNAME = username
             AuthorisedRequest.PASSWORD = password
@@ -110,5 +109,14 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 69) {
+            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+            val first = navHostFragment.childFragmentManager.fragments[0] as ChatFragment
+            first.refresh()
+        }
     }
 }

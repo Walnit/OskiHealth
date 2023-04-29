@@ -10,8 +10,8 @@ open class AuthorisedRequest(
 ) : StringRequest(method, HOST+url, listener, errorListener)
 {
     companion object {
-        var USERNAME = "mingy"
-        var PASSWORD = "123"
+        var USERNAME = ""
+        var PASSWORD = ""
         var HOST = "http://13.229.240.184:8888"
     }
 

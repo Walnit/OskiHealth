@@ -24,6 +24,7 @@ import com.google.gson.reflect.TypeToken
 class ChatFragment : Fragment() {
     private var columnCount = 1
     private lateinit var queue: RequestQueue
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,23 +35,12 @@ class ChatFragment : Fragment() {
 
         // Set the adapter
         with(view) {
-            val recyclerView: RecyclerView = findViewById(R.id.list)
+            recyclerView = findViewById(R.id.list)
             recyclerView.layoutManager = when {
                 columnCount <= 1 -> LinearLayoutManager(context)
                 else -> GridLayoutManager(context, columnCount)
             }
-            val chats = arrayListOf(Contact("Wellness Bot", isBot = true))
-            recyclerView.adapter = ChatsListRecyclerViewAdapter(chats)
-            val request = AuthorisedRequest(Method.GET, "/my-chats",
-                { response ->
-                    val gson = Gson()
-                    val listType = object : TypeToken<ArrayList<ContactItem>>() {}.type
-                    val list = gson.fromJson<ArrayList<ContactItem>>(response, listType)
-                    for (name in list) chats.add(Contact(name.username, name.psych))
-                    recyclerView.adapter?.notifyItemRangeInserted(1, list.size)
-                }, {}
-            )
-            queue.add(request)
+            refresh()
 
             val addContactButton: Button = findViewById(R.id.addContactButton)
             addContactButton.setOnClickListener {
@@ -75,6 +65,20 @@ class ChatFragment : Fragment() {
         }
         return view
     }
+
+     fun refresh() {
+         val request = AuthorisedRequest(Method.GET, "/my-chats",
+             { response ->
+                 val chats = arrayListOf(Contact("Wellness Bot", isBot = true))
+                 val gson = Gson()
+                 val listType = object : TypeToken<ArrayList<ContactItem>>() {}.type
+                 val list = gson.fromJson<ArrayList<ContactItem>>(response, listType)
+                 for (name in list) chats.add(Contact(name.username, name.psych))
+                 recyclerView.adapter = ChatsListRecyclerViewAdapter(chats)
+             }, {}
+         )
+         queue.add(request)
+     }
 }
 
 data class ContactItem(val username: String, val psych: Boolean)
